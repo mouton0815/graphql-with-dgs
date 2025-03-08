@@ -1,16 +1,15 @@
-package eu.unite.graph;
+package eu.unite.graph
 
-import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsData
 import com.netflix.graphql.dgs.DgsDataFetchingEnvironment
-import com.netflix.graphql.dgs.DgsMutation;
+import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import eu.unite.graph.codegen.types.Author
-import eu.unite.graph.codegen.types.AuthorInput
 import eu.unite.graph.codegen.types.Book
 
 @DgsComponent
-public class GraphAdapter {
+class GraphAdapter {
 
     private data class AuthorRecord(val id: String, val name: String, val birth: String?, val city: String?) {
         fun toAuthor(): Author {
@@ -46,10 +45,10 @@ public class GraphAdapter {
     )
 
     @DgsMutation
-    fun createAuthor(input: AuthorInput): Author {
+    fun createAuthor(name: String, birth: String?, city: String?): Author {
         val id = (authorList.size + 1).toString()
-        authorList.addLast(AuthorRecord(id, input.name, input.birth, input.city))
-        return Author(id, input.name, input.birth, input.city) // No associated books yet
+        authorList.addLast(AuthorRecord(id, name, birth, city))
+        return Author(id, name, birth, city) // No associated books yet
     }
 
     @DgsQuery(field = "authors")
