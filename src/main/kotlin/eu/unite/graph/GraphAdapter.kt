@@ -1,6 +1,8 @@
 package eu.unite.graph;
 
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsData
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery
 import eu.unite.graph.codegen.types.Author
@@ -10,17 +12,23 @@ import eu.unite.graph.codegen.types.Book
 @DgsComponent
 public class GraphAdapter {
 
+    private data class AuthorRecord(val id: String, val name: String, val birth: String?, val city: String?) {
+        fun toAuthor(): Author {
+            return Author(this.id, this.name, this.birth, this.city)
+        }
+    }
+
     private data class BookRecord(val id: String, val title: String, val year: Int, val authorId: String) {
-        fun toBook(authors: List<Author>): Book {
-            return Book(this.id, this.title, this.year, authors.find { a -> a.id == this.authorId })
+        fun toBook(): Book {
+            return Book(this.id, this.title, this.year)
         }
     }
 
     private val authorList = mutableListOf(
-        Author("1", "Kate Chopin", "1850-02-08", "St. Louis"),
-        Author("2", "Paul Auster","1947-02-03","New York"),
-        Author("3", "Jennifer Egan", "1962-09-07", "New York"),
-        Author("4", "T.C. Boyle", "1948-12-02", "Montecito CA")
+        AuthorRecord("1", "Kate Chopin", "1850-02-08", "St. Louis"),
+        AuthorRecord("2", "Paul Auster","1947-02-03","New York"),
+        AuthorRecord("3", "Jennifer Egan", "1962-09-07", "New York"),
+        AuthorRecord("4", "T.C. Boyle", "1948-12-02", "Montecito CA")
     )
 
     private val bookList = listOf(
@@ -40,33 +48,40 @@ public class GraphAdapter {
     @DgsMutation
     fun createAuthor(input: AuthorInput): Author {
         val id = (authorList.size + 1).toString()
-        val author = Author(id, input.name, input.birth, input.city)
-        authorList.addLast(author)
-        return author
+        authorList.addLast(AuthorRecord(id, input.name, input.birth, input.city))
+        return Author(id, input.name, input.birth, input.city) // No associated books yet
     }
 
-    @DgsQuery
-    fun authors(): List<Author> {
-        return authorList
+    @DgsQuery(field = "authors")
+    fun allAuthors(): List<Author> {
+        return authorList.map { a -> a.toAuthor() }
     }
 
-    @DgsQuery
-    fun author(id: String): Author? {
-        return authorList.find { author -> author.id == id }
+    @DgsQuery(field = "author")
+    fun selectAuthor(id: String): Author? {
+        return authorList.find { author -> author.id == id }?.toAuthor()
     }
 
-    @DgsQuery
-    fun books(): List<Book> {
-        return bookList
-            .stream()
-            .map { b -> b.toBook(authorList) }
-            .toList()
+    @DgsData(parentType = "Author", field = "books")
+    fun authorBooks(dfe: DgsDataFetchingEnvironment): List<Book> {
+        val author = dfe.getSource<Author>() ?: return emptyList()
+        return bookList.filter { b -> b.authorId == author.id }.map { b -> b.toBook() }
     }
 
-    @DgsQuery
-    fun book(id: String): Book? {
-        return bookList
-            .find { book -> book.id == id }
-            ?.toBook(authorList)
+    @DgsQuery(field = "books")
+    fun allBooks(): List<Book> {
+        return bookList.map { b -> b.toBook() }
+    }
+
+    @DgsQuery(field = "book")
+    fun selectedBook(id: String): Book? {
+        return bookList.find { book -> book.id == id }?.toBook()
+    }
+
+    @DgsData(parentType = "Book", field = "author")
+    fun bookAuthor(dfe: DgsDataFetchingEnvironment): Author? {
+        val book = dfe.getSource<Book>() ?: return null
+        val record = bookList.find { b -> b.id == book.id } ?: return null
+        return authorList.find { a -> a.id == record.authorId }?.toAuthor()
     }
 }
