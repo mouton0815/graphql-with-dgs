@@ -8,11 +8,11 @@ Example query for a GraphQL client:
 ```graphql
 {
   author(id: 2) {
-    id
     name
     birth
     books {
       title
+      year  
     }
   }
 }
@@ -21,7 +21,7 @@ Curl equivalent:
 ```shell
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"query": "{ author(id: 2) { id name birth books { title } } }"}' \
+  -d '{"query": "{ author(id: 2) { name birth books { title year } } }"}' \
   http://localhost:8080/graphql
 ```
 Create new author:
@@ -33,7 +33,7 @@ mutation CreateAuthor($name: String!, $birth: String, $city: String) {
     }
 }
 ```
-with an example author:
+with example author data:
 ```json
 {
     "name": "John Steinbeck",
@@ -41,3 +41,23 @@ with an example author:
     "city": "Salinas"
 }
 ```
+Create new book for the author:
+```graphql
+mutation CreateBook($title: String!, $year: Int!, $authorId: ID!) {
+    createBook(title: $title, year: $year, authorId: $authorId) {
+        id
+        title
+    }
+}
+```
+with example book data:
+```json
+{
+  "title": "Of Mice and Men",
+  "year": 1937,
+  "authorId": "5"
+}
+```
+
+
+

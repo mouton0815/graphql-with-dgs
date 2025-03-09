@@ -17,12 +17,6 @@ class GraphAdapter {
         }
     }
 
-    private data class BookRecord(val id: String, val title: String, val year: Int, val authorId: String) {
-        fun toBook(): Book {
-            return Book(this.id, this.title, this.year)
-        }
-    }
-
     private val authorList = mutableListOf(
         AuthorRecord("1", "Kate Chopin", "1850-02-08", "St. Louis"),
         AuthorRecord("2", "Paul Auster","1947-02-03","New York"),
@@ -30,7 +24,13 @@ class GraphAdapter {
         AuthorRecord("4", "T.C. Boyle", "1948-12-02", "Montecito CA")
     )
 
-    private val bookList = listOf(
+    private data class BookRecord(val id: String, val title: String, val year: Int, val authorId: String?) {
+        fun toBook(): Book {
+            return Book(this.id, this.title, this.year)
+        }
+    }
+
+    private val bookList = mutableListOf(
         BookRecord("1", "The Awakening", 1899, "1"),
         BookRecord("2", "City of Glass", 1985, "2"),
         BookRecord("3", "Moon Palace", 1989, "2"),
@@ -65,6 +65,13 @@ class GraphAdapter {
     fun authorBooks(dfe: DgsDataFetchingEnvironment): List<Book> {
         val author = dfe.getSource<Author>() ?: return emptyList()
         return bookList.filter { b -> b.authorId == author.id }.map { b -> b.toBook() }
+    }
+
+    @DgsMutation
+    fun createBook(title: String, year: Int, authorId: String): Book {
+        val id = (bookList.size + 1).toString()
+        bookList.addLast(BookRecord(id, title, year, authorId))
+        return Book(id, title, year)
     }
 
     @DgsQuery(field = "books")
