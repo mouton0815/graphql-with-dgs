@@ -41,6 +41,13 @@ with example author data:
     "city": "Salinas"
 }
 ```
+Curl equivalent:
+```shell
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"query": "mutation { createAuthor(name: \"John Steinbeck\", birth: \"1902-02-27\", city: \"Salinas\") { id name } }"}' \
+  http://localhost:8080/graphql
+```
 Create new book for the author:
 ```graphql
 mutation CreateBook($title: String!, $year: Int!, $authorId: ID!) {
@@ -57,6 +64,13 @@ with example book data:
   "year": 1937,
   "authorId": "5"
 }
+```
+Curl equivalent:
+```shell
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"query": "mutation { createBook(title: \"Of Mice and Men\", year: 1937, authorId: \"5\") { id title } }"}' \
+  http://localhost:8080/graphql
 ```
 
 

@@ -1,11 +1,6 @@
 package eu.unite.graph.repository
 
-interface Repository {
-    fun createAuthor(name: String, birth: String?, city: String?): AuthorRecord
-    fun getAuthors(): List<AuthorRecord>
-    fun getAuthor(id: String): AuthorRecord?
-    fun getAuthorOfBook(bookId: String): AuthorRecord?
-
+interface BookRepository {
     fun createBook(title: String, year: Int, authorId: String): BookRecord
     fun getBooks(): List<BookRecord>
     fun getBook(id: String): BookRecord?
