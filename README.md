@@ -1,4 +1,4 @@
-# GraphQL with Netflix DSG
+# GraphQL with Netflix DGS
 
 ```
 mvn spring-boot:run
