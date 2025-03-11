@@ -1,13 +1,27 @@
 # GraphQL with Netflix DGS
+This is a demo of the [Netflix DGS framework](https://netflix.github.io/dgs/) to create GraphQL services with Spring Boot.
 
+It showcases a toy libraries with books and their authors.
+The DGS data fetches allow to implement nested queries of arbitrary depth.
+
+## Run the Server
 ```
 mvn spring-boot:run
 ```
 
-Example query for a GraphQL client:
+The DGS services exposes an interactive GraphQL client on the URL
+```
+http://localhost:8080/graphiql
+```
+
+![GraphiQL](GraphiQL.png)
+
+
+## Example Queries and Mutations
+Show name, birthdate of the author with ID 3, plus title and year of all their books:
 ```graphql
-{
-  author(id: 2) {
+query {
+  author(id: 3) {
     name
     birth
     books {
@@ -17,59 +31,61 @@ Example query for a GraphQL client:
   }
 }
 ```
-Curl equivalent:
+Create a new author:
+```graphql
+mutation {
+  createAuthor(name: "John Steinbeck", birth: "1902-02-27", city: "Salinas") {
+    id
+    name
+  }
+}
+```
+To improve reuse, the mutation can be wrapped into a function, which takes its arguments from a variables object:
+```graphql
+mutation CreateAuthor($name: String!, $birth: String, $city: String) {
+  createAuthor(name: $name, birth: $birth, city: $city) {
+    id
+    name
+  }
+}
+```
+with example data in variables:
+```json
+{
+  "name": "John Steinbeck",
+  "birth": "1902-02-27",
+  "city": "Salinas"
+}
+```
+Create a new book for the author:
+```graphql
+mutation {
+  createBook(title: "Of Mice and Men", year: 1937, authorId: 5) {
+    id
+    title
+  }
+}
+```
+
+## Curl Equivalents
+GraphQL queries and mutations can also be executed by curl or other command-line HTTP clients.
+Below are the curl equivalents to the query and mutations above:
 ```shell
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"query": "{ author(id: 2) { name birth books { title year } } }"}' \
+  -d '{"query": "query { author(id: 3) { name birth books { title year } } }"}' \
   http://localhost:8080/graphql
 ```
-Create new author:
-```graphql
-mutation CreateAuthor($name: String!, $birth: String, $city: String) {
-    createAuthor(name: $name, birth: $birth, city: $city) {
-        id
-        name
-    }
-}
-```
-with example author data:
-```json
-{
-    "name": "John Steinbeck",
-    "birth": "1902-02-27",
-    "city": "Salinas"
-}
-```
-Curl equivalent:
 ```shell
 curl -X POST \
   -H "Content-Type: application/json" \
-  --data '{"query": "mutation { createAuthor(name: \"John Steinbeck\", birth: \"1902-02-27\", city: \"Salinas\") { id name } }"}' \
+  -d '{"query": "mutation { createAuthor(name: \"John Steinbeck\", birth: \"1902-02-27\", city: \"Salinas\") { id name } }"}' \
   http://localhost:8080/graphql
 ```
-Create new book for the author:
-```graphql
-mutation CreateBook($title: String!, $year: Int!, $authorId: ID!) {
-    createBook(title: $title, year: $year, authorId: $authorId) {
-        id
-        title
-    }
-}
-```
-with example book data:
-```json
-{
-  "title": "Of Mice and Men",
-  "year": 1937,
-  "authorId": "5"
-}
-```
-Curl equivalent:
 ```shell
 curl -X POST \
   -H "Content-Type: application/json" \
-  --data '{"query": "mutation { createBook(title: \"Of Mice and Men\", year: 1937, authorId: \"5\") { id title } }"}' \
+  -d '{"query": "mutation { createBook(title: \"Of Mice and Men\", year: 1937, authorId: 5) { id title } }"}' \
   http://localhost:8080/graphql
 ```
 
