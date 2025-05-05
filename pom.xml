@@ -37,6 +37,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.netflix.graphql.dgs</groupId>
 			<artifactId>graphql-dgs-spring-graphql-starter</artifactId>
 		</dependency>
@@ -47,6 +51,10 @@
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-stdlib</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlinx</groupId>
+			<artifactId>kotlinx-coroutines-reactive</artifactId>
 		</dependency>
 
 		<dependency>
@@ -94,7 +102,7 @@
 						</goals>
 						<configuration>
 							<schemaPaths>
-								<param>${project.basedir}/src/main/resources/schema/library.graphql</param>
+								<param>${project.basedir}/src/main/resources/schema/bookstore.graphql</param>
 							</schemaPaths>
 							<packageName>eu.unite.graph.codegen</packageName>
 							<language>kotlin</language>

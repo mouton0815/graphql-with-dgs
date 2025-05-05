@@ -1,7 +1,7 @@
 # GraphQL with Netflix DGS
 This is a demo of the [Netflix DGS framework](https://netflix.github.io/dgs/) to create GraphQL services with Spring Boot.
 
-It showcases a toy libraries with books and their authors.
+It showcases a toy store with books, their authors, and sales records.
 The DGS data fetches allow to implement nested queries of arbitrary depth.
 
 ## Run the Server
@@ -17,7 +17,7 @@ http://localhost:8080/graphiql
 ![GraphiQL](GraphiQL.png)
 
 
-## Example Queries and Mutations
+## Example Queries, Mutations, and Subscriptions
 Show name, birthdate of the author with ID 3, plus title and year of all their books:
 ```graphql
 query {
@@ -66,6 +66,17 @@ mutation {
   }
 }
 ```
+Subscribe to book-sale events issued by the server:
+```graphql
+subscription {
+  sales {
+    book {
+      title
+    }
+    sales
+  }
+}
+```
 
 ## Curl Equivalents
 GraphQL queries and mutations can also be executed by curl or other command-line HTTP clients.
@@ -88,6 +99,6 @@ curl -X POST \
   -d '{"query": "mutation { createBook(title: \"Of Mice and Men\", year: 1937, authorId: 5) { id title } }"}' \
   http://localhost:8080/graphql
 ```
-
+GraphQL subscriptions are not supported by curl, see https://stackoverflow.com/a/47860810.
 
 
